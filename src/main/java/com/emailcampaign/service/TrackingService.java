@@ -39,29 +39,21 @@ public class TrackingService {
         if (existingTracking.isPresent()) {
             EmailTracking tracking = existingTracking.get();
             
-            // Check if this is the first open
-            boolean isFirstOpen = emailTrackingRepository
-                    .findByCampaignAndRecipient(tracking.getCampaign(), tracking.getRecipient(), null)
-                    .stream()
-                    .noneMatch(t -> t.getEventType() == EmailTracking.EventType.OPENED);
+            EmailTracking openTracking = new EmailTracking();
+            openTracking.setTrackingId(UUID.randomUUID().toString());
+            openTracking.setEventType(EmailTracking.EventType.OPENED);
+            openTracking.setCampaign(tracking.getCampaign());
+            openTracking.setRecipient(tracking.getRecipient());
+            openTracking.setIpAddress(getClientIpAddress(request));
+            openTracking.setUserAgent(request.getHeader("User-Agent"));
+            openTracking.setDeviceType(detectDeviceType(request.getHeader("User-Agent")));
+            openTracking.setEmailClient(detectEmailClient(request.getHeader("User-Agent")));
+            openTracking.setEventTime(LocalDateTime.now());
             
-            if (isFirstOpen) {
-                EmailTracking openTracking = new EmailTracking();
-                openTracking.setTrackingId(UUID.randomUUID().toString());
-                openTracking.setEventType(EmailTracking.EventType.OPENED);
-                openTracking.setCampaign(tracking.getCampaign());
-                openTracking.setRecipient(tracking.getRecipient());
-                openTracking.setIpAddress(getClientIpAddress(request));
-                openTracking.setUserAgent(request.getHeader("User-Agent"));
-                openTracking.setDeviceType(detectDeviceType(request.getHeader("User-Agent")));
-                openTracking.setEmailClient(detectEmailClient(request.getHeader("User-Agent")));
-                openTracking.setEventTime(LocalDateTime.now());
-                
-                emailTrackingRepository.save(openTracking);
-                
-                log.debug("Email open tracked for campaign: {} recipient: {}", 
-                        tracking.getCampaign().getName(), tracking.getRecipient().getEmail());
-            }
+            emailTrackingRepository.save(openTracking);
+            
+            log.debug("Email open tracked for campaign: {} recipient: {}", 
+                    tracking.getCampaign().getName(), tracking.getRecipient().getEmail());
         }
     }
     

@@ -38,9 +38,11 @@ public class RecipientList {
     private User user;
     
     @OneToMany(mappedBy = "recipientList", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private List<Recipient> recipients;
     
     @OneToMany(mappedBy = "recipientList", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private List<Campaign> campaigns;
     
     @PreUpdate

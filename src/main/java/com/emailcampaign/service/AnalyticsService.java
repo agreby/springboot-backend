@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.HashMap;
 
 @Service
 @RequiredArgsConstructor
@@ -172,5 +173,25 @@ public class AnalyticsService {
         
         // This would typically update analytics for recently active campaigns
         // Implementation depends on your specific requirements
+    }
+
+    public Map<String, Object> getDashboardStats(com.emailcampaign.model.User user) {
+        Map<String, Object> stats = new HashMap<>();
+        // Get all campaigns for the user
+        List<com.emailcampaign.model.Campaign> campaigns = user.getCampaigns();
+        long totalSent = 0;
+        long totalClicked = 0;
+        for (com.emailcampaign.model.Campaign campaign : campaigns) {
+            totalSent += emailTrackingRepository.countByCampaignAndEventType(campaign, com.emailcampaign.model.EmailTracking.EventType.SENT);
+            totalClicked += emailTrackingRepository.countByCampaignAndEventType(campaign, com.emailcampaign.model.EmailTracking.EventType.CLICKED);
+        }
+        // Dummy revenue and growth for now
+        double revenue = totalSent * 2.95; // Example: $2.95 per email
+        double growth = 0.37; // Example: 37% growth
+        stats.put("emailsSent", totalSent);
+        stats.put("clicks", totalClicked);
+        stats.put("revenue", revenue);
+        stats.put("growth", growth);
+        return stats;
     }
 }

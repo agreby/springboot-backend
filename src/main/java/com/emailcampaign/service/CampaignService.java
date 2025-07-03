@@ -4,8 +4,10 @@ import com.emailcampaign.dto.CampaignDto;
 import com.emailcampaign.model.Campaign;
 import com.emailcampaign.model.RecipientList;
 import com.emailcampaign.model.User;
+import com.emailcampaign.model.Recipient;
 import com.emailcampaign.repository.CampaignRepository;
 import com.emailcampaign.repository.RecipientListRepository;
+import com.emailcampaign.repository.RecipientRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -25,6 +27,7 @@ public class CampaignService {
     
     private final CampaignRepository campaignRepository;
     private final RecipientListRepository recipientListRepository;
+    private final RecipientRepository recipientRepository;
     private final EmailService emailService;
     private final SystemLogService systemLogService;
     
@@ -40,7 +43,23 @@ public class CampaignService {
         campaign.setStatus(Campaign.CampaignStatus.DRAFT);
         campaign.setUser(user);
         
-        if (campaignDto.getRecipientListId() != null) {
+        if (campaignDto.getRecipientEmail() != null && !campaignDto.getRecipientEmail().isEmpty()) {
+            // Create a temporary recipient list
+            RecipientList tempList = new RecipientList();
+            tempList.setName("Single Send " + campaignDto.getRecipientEmail() + " [" + System.currentTimeMillis() + "]");
+            tempList.setDescription("Temporary list for single send");
+            tempList.setUser(user);
+            tempList = recipientListRepository.save(tempList);
+
+            // Create the recipient
+            Recipient recipient = new Recipient();
+            recipient.setEmail(campaignDto.getRecipientEmail());
+            recipient.setStatus(Recipient.RecipientStatus.ACTIVE);
+            recipient.setRecipientList(tempList);
+            recipientRepository.save(recipient);
+
+            campaign.setRecipientList(tempList);
+        } else if (campaignDto.getRecipientListId() != null) {
             RecipientList recipientList = recipientListRepository.findById(campaignDto.getRecipientListId())
                     .orElseThrow(() -> new RuntimeException("Recipient list not found"));
             campaign.setRecipientList(recipientList);

@@ -79,8 +79,7 @@ public class CampaignController {
                         .body(ApiResponse.error("Campaign not found"));
             }
             
-            // Check if user owns the campaign or is admin
-            if (!campaign.get().getUser().getId().equals(user.getId()) && 
+            if (!campaign.get().getUser().getId().equals(user.getId()) &&
                 user.getRole() != User.Role.ADMIN) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN)
                         .body(ApiResponse.error("Access denied"));

@@ -64,3 +64,6 @@ springdoc:
     path: /api-docs
   swagger-ui:
     path: /swagger-ui.html
+
+app:
+  base-url: https://841d-102-104-231-193.ngrok-free.app

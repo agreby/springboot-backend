@@ -59,17 +59,17 @@ public class EmailService {
         
         for (Recipient recipient : recipients) {
             try {
-                sendEmailToRecipient(campaign, recipient);
+                String trackingId = sendEmailToRecipient(campaign, recipient);
                 sentCount++;
                 
-                // Log sent event
-                logEmailEvent(campaign, recipient, EmailTracking.EventType.SENT, null, null, null);
+                // Log sent event with the same trackingId as the pixel
+                logEmailEvent(campaign, recipient, EmailTracking.EventType.SENT, trackingId, null, null);
                 
             } catch (Exception e) {
                 log.error("Failed to send email to {}: {}", recipient.getEmail(), e.getMessage());
                 failedCount++;
                 
-                // Log bounce event
+                // Log bounce event (no trackingId for bounce)
                 logEmailEvent(campaign, recipient, EmailTracking.EventType.BOUNCED, null, null, null);
             }
         }
@@ -82,7 +82,7 @@ public class EmailService {
                 campaign.getName(), sentCount, failedCount);
     }
     
-    private void sendEmailToRecipient(Campaign campaign, Recipient recipient) throws MessagingException, java.io.UnsupportedEncodingException {
+    private String sendEmailToRecipient(Campaign campaign, Recipient recipient) throws MessagingException, java.io.UnsupportedEncodingException {
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
         
@@ -105,6 +105,8 @@ public class EmailService {
         mailSender.send(message);
         
         log.debug("Email sent to {} for campaign {}", recipient.getEmail(), campaign.getName());
+        
+        return trackingId;
     }
     
     private String prepareEmailContent(Campaign campaign, Recipient recipient, String trackingId) {
@@ -126,7 +128,6 @@ public class EmailService {
         
         content += trackingPixel;
         
-        // Process links for click tracking
         content = trackingService.processLinksForTracking(content, campaign, recipient);
         
         return content;
@@ -147,14 +148,14 @@ public class EmailService {
     }
     
     private void logEmailEvent(Campaign campaign, Recipient recipient, 
-                              EmailTracking.EventType eventType, String ipAddress, 
+                              EmailTracking.EventType eventType, String trackingId, 
                               String userAgent, String linkUrl) {
         EmailTracking tracking = new EmailTracking();
-        tracking.setTrackingId(UUID.randomUUID().toString());
+        tracking.setTrackingId(trackingId != null ? trackingId : UUID.randomUUID().toString());
         tracking.setEventType(eventType);
         tracking.setCampaign(campaign);
         tracking.setRecipient(recipient);
-        tracking.setIpAddress(ipAddress);
+        tracking.setIpAddress(null);
         tracking.setUserAgent(userAgent);
         tracking.setLinkUrl(linkUrl);
         tracking.setEventTime(LocalDateTime.now());

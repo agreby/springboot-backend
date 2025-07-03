@@ -31,4 +31,5 @@ public class CampaignDto {
     private String recipientListName;
     private Long userId;
     private String username;
+    private String recipientEmail;
 }

@@ -85,6 +85,19 @@ public class AnalyticsController {
         }
     }
     
+    @GetMapping("/dashboard")
+    public ResponseEntity<ApiResponse> getDashboardStats(Authentication authentication) {
+        try {
+            User user = getCurrentUser(authentication);
+            var stats = analyticsService.getDashboardStats(user);
+            return ResponseEntity.ok(ApiResponse.success("Dashboard stats retrieved successfully", stats));
+        } catch (Exception e) {
+            log.error("Error retrieving dashboard stats: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.error("Error retrieving dashboard stats"));
+        }
+    }
+    
     private User getCurrentUser(Authentication authentication) {
         String username = authentication.getName();
         return userService.findByUsername(username)

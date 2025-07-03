@@ -19,6 +19,8 @@ import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -55,7 +57,10 @@ public class AuthController {
                         request.getHeader("User-Agent"));
             }
             
-            return ResponseEntity.ok(ApiResponse.success("Login successful", jwt));
+            Map<String, Object> responseData = new HashMap<>();
+            responseData.put("token", jwt);
+            responseData.put("user", user);
+            return ResponseEntity.ok(ApiResponse.success("Login successful", responseData));
             
         } catch (Exception e) {
             log.error("Login failed for user: {}", loginDto.getUsername(), e);
@@ -88,8 +93,6 @@ public class AuthController {
     @PostMapping("/forgot-password")
     public ResponseEntity<ApiResponse> forgotPassword(@RequestParam String email) {
         try {
-            // Implementation for password reset would go here
-            // For now, just return success
             return ResponseEntity.ok(ApiResponse.success("Password reset instructions sent to email"));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)

@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -67,12 +68,15 @@ public class Campaign {
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "recipient_list_id")
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private RecipientList recipientList;
     
     @OneToMany(mappedBy = "campaign", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private List<EmailTracking> emailTrackings;
     
     @OneToMany(mappedBy = "campaign", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private List<CampaignAnalytics> analytics;
     
     @PreUpdate
