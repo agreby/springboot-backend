@@ -23,8 +23,8 @@ spring:
   mail:
     host: ${MAIL_HOST:smtp.gmail.com}
     port: ${MAIL_PORT:587}
-    username: ${MAIL_USERNAME:lasbatasba@gmail.com}
-    password: ${MAIL_PASSWORD:xfao uefb ilwc drdi}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
     properties:
       mail:
         smtp:
@@ -66,4 +66,4 @@ springdoc:
     path: /swagger-ui.html
 
 app:
-  base-url: https://841d-102-104-231-193.ngrok-free.app
+  base-url: https://.ngrok-free.app
